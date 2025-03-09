@@ -77,3 +77,11 @@ p6 = ggplot(df, aes(x = AQ_Par, y = response_key.corr, fill = AQ_Par)) +
 
 final_p = (p1 | p2) / (p3 | p4) / (p5 | p6)
 print(final_p)
+
+#### Reasearch Question: ----
+# How do AQ levels (High vs. Low) of both the participant (AQ_Par) and the 
+# interviewer (AQ_intvwee) influence performance in a classification task across
+# different experimental conditions? Specifically, how do AQ levels predict the
+# likelihood of a correct response, reaction time, sensitivity, precision, 
+# F1-score, and accuracy?
+
