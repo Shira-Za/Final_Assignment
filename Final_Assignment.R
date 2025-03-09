@@ -96,4 +96,33 @@ print(final_p)
 #stimuli shown to participants. These predictors will help determine how AQ 
 #levels and experimental conditions influence performance in the task.
 
+# Function to calculate summary measures
+calculate_summary <- function(df) {
+  action_code_target <- 2  # Define the target action code for "Think"
+  df |>
+    group_by(expName) |>
+    summarise(
+      number = n(),
+      accuracy = sum((action_code == action_code_target & response_key.keys == action_code_target) |
+                       (action_code != action_code_target & response_key.keys != action_code_target)) / n(),
+      n_think = mean(response_key.keys == action_code, na.rm = TRUE),
+      n_choseThink = mean(response_key.keys[action == "Think"] == action_code_target, na.rm = TRUE),
+      sensitivity = ifelse(sum(response_key.keys == action_code_target) > 0,
+                           sum(action_code == action_code_target & response_key.keys == action_code_target) / 
+                             sum(action_code == action_code_target), 0),
+      precision = ifelse(sum(response_key.keys == action_code_target) > 0,
+                         sum(action_code == action_code_target & response_key.keys == action_code_target) / 
+                           sum(response_key.keys == action_code_target), 0),
+      F1_score = ifelse(sensitivity + precision > 0, 2 / (1 / sensitivity + 1 / precision), 0)
+    )
+}
 
+# Review summary tables of some calculated measures:
+summary_AQ_Par <- df |>
+  group_by(AQ_Par) |> group_modify(~ calculate_summary(.x))
+summary_AQ_intvwee <- df |>
+  group_by(AQ_intvwee) |> group_modify(~ calculate_summary(.x))
+
+# Print results
+print(summary_AQ_Par)
+print(summary_AQ_intvwee)
