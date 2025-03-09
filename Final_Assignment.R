@@ -29,12 +29,13 @@ df <- read.csv("all_data.csv")
 df <- df |>
   filter(!is.na(AQ_Par)) |>
   select(participant, action, action_code, response_key.keys, response_key.corr, 
-         response_key.rt, intvwee, expName, AQ_Par, AQ_intvwee)
-
-df$AQ_Par <- factor(df$AQ_Par, levels = c(0, 1), labels = c("Low", "High"))
-df$AQ_intvwee <- factor(df$AQ_intvwee, levels = c(0, 1), labels = c("Low", "High"))
-df$expName <- factor(df$expName)
-df$action <- factor(df$action)
+         response_key.rt, intvwee, expName, AQ_Par, AQ_intvwee) |>
+  mutate(Q_Par = factor(AQ_Par, levels = c(0, 1), labels = c("Low", "High")),
+         AQ_intvwee = factor(AQ_intvwee, levels = c(0, 1), labels = c("Low", "High")),
+         expName = factor(expName, levels = c("calssify_interact", "calssify_interact_onlyeyes", "calssify_interact_noeyes"), 
+                          labels = c("classify_interact", "Only_eyes", "No_eyes")),
+         action = factor(action, levels = c('Tap', 'Listen', 'Solve'), labels = c('Wait', 'Listen', 'Think'))
+         )
 
 # Exploring the Data:
 # Response times across experiments:
@@ -96,24 +97,3 @@ print(final_p)
 #levels and experimental conditions influence performance in the task.
 
 
-# Function to calculate performance measures based on the signal detection theory:
-calculate_measures <- function(df, action_code_target) {
-  df |>
-    group_by(expName, AQ_Par, AQ_intvwee) |>
-    summarise(
-      #True Positive:
-      TP = sum(action_code == action_code_target & response_key.keys == action_code_target),
-      #False Negative:
-      FN = sum(action_code == action_code_target & response_key.keys != action_code_target),
-      #False Positive:
-      FP = sum(action_code != action_code_target & response_key.keys == action_code_target),
-      #True Negative:
-      TN = sum(action_code != action_code_target & response_key.keys != action_code_target),
-      #More complex measurements: 
-      Sensitivity = ifelse(TP + FN > 0, TP / (TP + FN), 0), #the ability to correctly identify true positives
-      Precision = ifelse(TP + FP > 0, TP / (TP + FP), 0), #the accuracy of positive predictions
-      Accuracy = (TP + TN) / (TP + TN + FP + FN), #the percentage of correct responses out of total responses
-      F1 = ifelse(TP + FP > 0 & TP + FN > 0, 2 * (Precision * Sensitivity) / (Precision + Sensitivity), 0), #the harmonic mean of sensitivity and precision
-      .groups = "drop"
-    )
-}
