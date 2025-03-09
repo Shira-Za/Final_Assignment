@@ -85,6 +85,16 @@ print(final_p)
 # likelihood of a correct response, reaction time, sensitivity, precision, 
 # F1-score, and accuracy?
 
+#Based on the research question, the outcome variables include the likelihood 
+#of a correct response, reaction time, sensitivity, precision, F1-score, 
+#and accuracy, which are used to assess performance in a classification task. 
+#The predictor variables include the participant's AQ level (AQ_Par) and the 
+#interviewee's AQ level (AQ_intvwee), both of which are categorical variables 
+#with two levels: "Low" (0) and "High" (1). Additionally, the experimental condition 
+#(expName) is a categorical variable representing different manipulations of the 
+#stimuli shown to participants. These predictors will help determine how AQ 
+#levels and experimental conditions influence performance in the task.
+
 
 # Function to calculate performance measures based on the signal detection theory:
 calculate_measures <- function(df, action_code_target) {
@@ -100,11 +110,10 @@ calculate_measures <- function(df, action_code_target) {
       #True Negative:
       TN = sum(action_code != action_code_target & response_key.keys != action_code_target),
       #More complex measurements: 
-      Sensitivity = ifelse(TP + FN > 0, TP / (TP + FN), 0),
-      Precision = ifelse(TP + FP > 0, TP / (TP + FP), 0),
-      Accuracy = (TP + TN) / (TP + TN + FP + FN),
-      F1 = ifelse(TP + FP > 0 & TP + FN > 0, 2 * (Precision * Sensitivity) / (Precision + Sensitivity), 0),
+      Sensitivity = ifelse(TP + FN > 0, TP / (TP + FN), 0), #the ability to correctly identify true positives
+      Precision = ifelse(TP + FP > 0, TP / (TP + FP), 0), #the accuracy of positive predictions
+      Accuracy = (TP + TN) / (TP + TN + FP + FN), #the percentage of correct responses out of total responses
+      F1 = ifelse(TP + FP > 0 & TP + FN > 0, 2 * (Precision * Sensitivity) / (Precision + Sensitivity), 0), #the harmonic mean of sensitivity and precision
       .groups = "drop"
     )
 }
-
