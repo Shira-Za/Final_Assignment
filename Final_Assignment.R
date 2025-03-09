@@ -85,3 +85,26 @@ print(final_p)
 # likelihood of a correct response, reaction time, sensitivity, precision, 
 # F1-score, and accuracy?
 
+
+# Function to calculate performance measures based on the signal detection theory:
+calculate_measures <- function(df, action_code_target) {
+  df |>
+    group_by(expName, AQ_Par, AQ_intvwee) |>
+    summarise(
+      #True Positive:
+      TP = sum(action_code == action_code_target & response_key.keys == action_code_target),
+      #False Negative:
+      FN = sum(action_code == action_code_target & response_key.keys != action_code_target),
+      #False Positive:
+      FP = sum(action_code != action_code_target & response_key.keys == action_code_target),
+      #True Negative:
+      TN = sum(action_code != action_code_target & response_key.keys != action_code_target),
+      #More complex measurements: 
+      Sensitivity = ifelse(TP + FN > 0, TP / (TP + FN), 0),
+      Precision = ifelse(TP + FP > 0, TP / (TP + FP), 0),
+      Accuracy = (TP + TN) / (TP + TN + FP + FN),
+      F1 = ifelse(TP + FP > 0 & TP + FN > 0, 2 * (Precision * Sensitivity) / (Precision + Sensitivity), 0),
+      .groups = "drop"
+    )
+}
+
