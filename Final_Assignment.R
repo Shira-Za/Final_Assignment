@@ -16,4 +16,22 @@
 # and also because I find this project interesting and relevant to understanding 
 # social interactions better. 
 
+#### Pre-processing: ----
+#loading data:
+setwd("~/Documents/2nd_Degree/Courses/R course/FA_SZ")
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(ggdist)
+library(patchwork)
 
+df <- read.csv("all_data.csv")
+df <- df |>
+  filter(!is.na(AQ_Par)) |>
+  select(participant, action, action_code, response_key.keys, response_key.corr, 
+         response_key.rt, intvwee, expName, AQ_Par, AQ_intvwee)
+
+df$AQ_Par <- factor(df$AQ_Par, levels = c(0, 1), labels = c("Low", "High"))
+df$AQ_intvwee <- factor(df$AQ_intvwee, levels = c(0, 1), labels = c("Low", "High"))
+df$expName <- factor(df$expName)
+df$action <- factor(df$action)
