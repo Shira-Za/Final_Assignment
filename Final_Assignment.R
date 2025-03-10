@@ -17,7 +17,7 @@
 # social interactions better. 
 
 #### Pre-processing: ----
-#loading data:
+#loading data and libraries:
 setwd("~/Documents/2nd_Degree/Courses/R course/FA_SZ")
 library(dplyr)
 library(tidyverse)
@@ -26,18 +26,26 @@ library(ggdist)
 library(patchwork)
 
 df <- read.csv("all_data.csv")
+
+# Data cleaning:
 df <- df |>
   filter(!is.na(AQ_Par)) |>
   select(participant, action, action_code, response_key.keys, response_key.corr, 
          response_key.rt, intvwee, expName, AQ_Par, AQ_intvwee) |>
-  mutate(Q_Par = factor(AQ_Par, levels = c(0, 1), labels = c("Low", "High")),
+  mutate(AQ_Par = factor(AQ_Par, levels = c(0, 1), labels = c("Low", "High")),
          AQ_intvwee = factor(AQ_intvwee, levels = c(0, 1), labels = c("Low", "High")),
          expName = factor(expName, levels = c("calssify_interact", "calssify_interact_onlyeyes", "calssify_interact_noeyes"), 
                           labels = c("classify_interact", "Only_eyes", "No_eyes")),
          action = factor(action, levels = c('Tap', 'Listen', 'Solve'), labels = c('Wait', 'Listen', 'Think'))
          )
 
+# Ensure numeric variables are not factors or logical
+df$response_key.keys <- as.numeric(df$response_key.keys)
+df$response_key.corr <- as.numeric(df$response_key.corr)
+df$action_code <- as.numeric(df$action_code)
+
 # Exploring the Data:
+
 # Response times across experiments:
 p1 = ggplot(df, aes(x = response_key.rt, fill = expName)) +
   geom_density(alpha = 0.3) +
@@ -80,6 +88,7 @@ final_p = (p1 | p2) / (p3 | p4) / (p5 | p6)
 print(final_p)
 
 #### Reasearch Question: ----
+
 # How do AQ levels (High vs. Low) of both the participant (AQ_Par) and the 
 # interviewer (AQ_intvwee) influence performance in a classification task across
 # different experimental conditions? Specifically, how do AQ levels predict the
@@ -96,7 +105,7 @@ print(final_p)
 #stimuli shown to participants. These predictors will help determine how AQ 
 #levels and experimental conditions influence performance in the task.
 
-#Library we haven't learned:
+#Using new function we haven't learned:
 library(datawizard)  # New package for descriptive statistics we didn't learn about.
 
 # Function to calculate summary measures using describe_distribution()
@@ -107,16 +116,16 @@ calculate_summary <- function(df) {
     group_by(expName) |>
     summarise(
       number = n(),
-      accuracy_stats = list(describe_distribution((action_code == action_code_target & response_key.keys == action_code_target) |
-                                                    (action_code != action_code_target & response_key.keys != action_code_target))),
-      n_think_stats = list(describe_distribution(response_key.keys == action_code, na.rm = TRUE)),
-      n_choseThink_stats = list(describe_distribution(response_key.keys[action == "Think"] == action_code_target, na.rm = TRUE)),
+      accuracy_stats = list(describe_distribution(as.numeric((action_code == action_code_target & response_key.keys == action_code_target) |
+                                                               (action_code != action_code_target & response_key.keys != action_code_target)))),
+      n_think_stats = list(describe_distribution(as.numeric(response_key.keys == action_code), na.rm = TRUE)),
+      n_choseThink_stats = list(describe_distribution(as.numeric(response_key.keys[action == "Think"] == action_code_target), na.rm = TRUE)),
       sensitivity = ifelse(sum(action_code == action_code_target) > 0,
-                           mean(action_code == action_code_target & response_key.keys == action_code_target) / 
-                             mean(action_code == action_code_target), 0),
-      precision = ifelse(sum(response_key.keys == action_code_target) > 0,
-                         mean(action_code == action_code_target & response_key.keys == action_code_target) / 
-                           mean(response_key.keys == action_code_target), 0),
+                           mean((action_code == action_code_target) & (response_key.keys == action_code_target), na.rm = TRUE) / 
+                             mean(action_code == action_code_target, na.rm = TRUE), 0),
+      precision = ifelse(sum(response_key.keys == action_code_target, na.rm = TRUE) > 0,
+                         mean((action_code == action_code_target) & (response_key.keys == action_code_target), na.rm = TRUE) / 
+                           mean(response_key.keys == action_code_target, na.rm = TRUE), 0),
       F1_score = ifelse(sensitivity + precision > 0, 2 * (sensitivity * precision) / (sensitivity + precision), 0)
     ) |>
     mutate(
@@ -142,3 +151,84 @@ summary_AQ_intvwee <- df |>
 # Print results
 print(summary_AQ_Par)
 print(summary_AQ_intvwee)
+
+#### Analyzing the Data ----
+
+# Loading libraries:
+library(pROC)  # For ROC curve
+library(effectsize)
+library(ggpubr)
+library(broom)  # For tidy model output
+
+# Linear Regression: Predicting Reaction Time 
+rt_model <- lm(response_key.rt ~ AQ_Par * AQ_intvwee * expName, data = df)
+summary(rt_model)
+
+# Plot reaction time effects
+plot1 = ggplot(df, aes(x = expName, y = response_key.rt, fill = AQ_Par)) +
+  geom_boxplot(alpha = 0.6) +
+  facet_wrap(~ AQ_intvwee) +
+  theme_minimal() +
+  labs(title = "RT by Experiment and Intervieew AQ Levels", 
+       y = "Reaction Time (s)", x = "Intervieew AQ Levels")
+
+# Logistic Regression: Predicting Accuracy (Correct Response):
+acc_model <- glm(response_key.corr ~ AQ_Par * AQ_intvwee * expName, family = binomial, data = df)
+summary(acc_model)
+
+# Calculate odds ratios
+odds_ratios <- exp(cbind(OR = coef(acc_model), confint(acc_model)))
+print(odds_ratios)
+
+
+# Plot accuracy
+plot2 = ggplot(df, aes(x = expName, y = response_key.corr, fill = AQ_Par)) +
+  stat_summary(fun = mean, geom = "bar", position = "dodge", alpha = 0.6) +
+  facet_wrap(~ AQ_intvwee) +
+  theme_minimal() +
+  labs(title = "Accuracy by Experiment and Intervieew AQ Levels", 
+       y = "Proportion Correct", x = "Intervieew AQ Levels")
+
+# Compute sensitivity, precision, F1-score per group:
+df_metrics <- df |>
+  group_by(AQ_Par, AQ_intvwee, expName) |>
+  summarise(
+    Sensitivity = sum(response_key.corr == 1) / n(),
+    Precision = sum(response_key.corr == 1) / sum(response_key.corr == 1 | response_key.corr == 0),
+    F1 = 2 * (Precision * Sensitivity) / (Precision + Sensitivity)
+  ) |>
+  pivot_longer(cols = c(Sensitivity, Precision, F1), names_to = "Metric", values_to = "Value")
+
+# Plot classification metrics
+plot3 = ggplot(df_metrics, aes(x = expName, y = Value, fill = AQ_Par)) +
+  geom_bar(stat = "identity", position = "dodge", alpha = 0.6) +
+  facet_grid(Metric ~ AQ_intvwee) +
+  theme_minimal() +
+  labs(title = "Classification Metrics by Experiment and Interviewees AQ Levels",
+       y = "Value", x = "Interviewee AQ Level")
+
+# ROC Curve: 
+roc_curve <- roc(df$response_key.corr, fitted(acc_model))
+
+plot4 = ggplot(data.frame(FPR = roc_curve$specificities, TPR = roc_curve$sensitivities),
+       aes(x = 1 - FPR, y = TPR)) +
+  geom_line(color = "blue") +
+  geom_abline(linetype = "dashed", color = "gray") +
+  labs(title = "ROC Curve for Logistic Regression",
+       x = "False Positive Rate (1 - Specificity)",
+       y = "True Positive Rate (Sensitivity)") +
+  theme_minimal()
+
+#calculating AUC:
+auc(roc_curve)
+
+Final_p2 = (plot1 | plot2) / (plot3 | plot4)
+print(Final_p2)
+
+
+
+
+
+
+
+
