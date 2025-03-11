@@ -172,6 +172,30 @@ plot1 = ggplot(df, aes(x = expName, y = response_key.rt, fill = AQ_Par)) +
   labs(title = "RT by Experiment and Intervieew AQ Levels", 
        y = "Reaction Time (s)", x = "Intervieew AQ Levels")
 
+#Interpreting the results:
+#This model examines how the participant's AQ level (AQ_Par), the interviewee's
+#AQ level (AQ_intvwee), and the experimental condition (expName) influence rts.
+
+#The intercept is 1.60, meaning that for low-AQ participants with low-AQ 
+#interviewees in the "classify_interact" experiment, the predicted response time
+#is approximately 1.60 seconds.
+
+#AQ_Par High interaction with expName Only_eyes:
+#This interaction term (0.366) is statistically significant (p = 0.0304), indicating 
+#that high-AQ participants take longer to respond in the "Only_eyes" condition 
+#compared to low-AQ participants.
+
+#AQ_intvwee High interaction with expName Only_eyes:
+#The interaction between high-AQ interviewees and the "Only_eyes" condition (0.396)
+#is also statistically significant (p = 0.0235). High-AQ interviewees increase 
+#participants' reaction time more in the "Only_eyes" condition compared to low-AQ 
+#interviewees.
+
+#Conclusion:
+#High-AQ participants tend to respond more slowly in the "Only_eyes" condition, 
+#particularly when paired with high-AQ interviewees. 
+
+
 # Logistic Regression: Predicting Accuracy (Correct Response):
 acc_model <- glm(response_key.corr ~ AQ_Par * AQ_intvwee * expName, family = binomial, data = df)
 summary(acc_model)
