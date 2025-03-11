@@ -238,10 +238,9 @@ plot2 = ggplot(df, aes(x = expName, y = response_key.corr, fill = AQ_Par)) +
 #no substantial effect on the likelihood of a correct response.
 
 #Overall Model:
-#The residual deviance (7584.0) and AIC (7608) indicate the model's goodness of 
-#fit. The model shows some statistically significant interaction effects, but 
-#the overall fit is modest, and it does not fully explain the variability in 
-#correct responses.
+#The AIC (7608) indicate the model's goodness of fit. The model shows some 
+#statistically significant interaction effects, but the overall fit is modest, 
+#and it does not fully explain the variability in correct responses.
 
 #Conclusion:
 #The presence of high-AQ interviewees seems to influence the likelihood of correct 
@@ -281,8 +280,13 @@ plot4 = ggplot(data.frame(FPR = roc_curve$specificities, TPR = roc_curve$sensiti
        y = "True Positive Rate (Sensitivity)") +
   theme_minimal()
 
-#calculating AUC:
-auc(roc_curve)
+#Interpreting the results:
+#AUC value: 0.5282
+#The AUC value is very close to 0.5, suggesting the model is performing nearly as 
+#well as random guessing in discriminating between correct and incorrect responses.
+#This indicates that the model has a low discriminative power, and further 
+#improvements are needed for better classification.
+
 
 Final_p2 = (plot1 | plot2) / (plot3 | plot4)
 print(Final_p2)
