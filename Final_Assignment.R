@@ -191,6 +191,10 @@ plot1 = ggplot(df, aes(x = expName, y = response_key.rt, fill = AQ_Par)) +
 #participants' reaction time more in the "Only_eyes" condition compared to low-AQ 
 #interviewees.
 
+#Other interactions and main effects are not significant, indicating that these 
+#variables (participant’s AQ, experimental condition, etc.) do not have a substantial 
+#impact on response time.
+
 #Conclusion:
 #High-AQ participants tend to respond more slowly in the "Only_eyes" condition, 
 #particularly when paired with high-AQ interviewees. 
@@ -204,7 +208,6 @@ summary(acc_model)
 odds_ratios <- exp(cbind(OR = coef(acc_model), confint(acc_model)))
 print(odds_ratios)
 
-
 # Plot accuracy
 plot2 = ggplot(df, aes(x = expName, y = response_key.corr, fill = AQ_Par)) +
   stat_summary(fun = mean, geom = "bar", position = "dodge", alpha = 0.6) +
@@ -212,6 +215,41 @@ plot2 = ggplot(df, aes(x = expName, y = response_key.corr, fill = AQ_Par)) +
   theme_minimal() +
   labs(title = "Accuracy by Experiment and Intervieew AQ Levels", 
        y = "Proportion Correct", x = "Intervieew AQ Levels")
+
+#Interpreting the results:
+#This model investigates how the participant's AQ level (AQ_Par), the interviewee's 
+#AQ level (AQ_intvwee), and the experimental condition (expName) influence the 
+#likelihood of a correct response (response_key.corr). The outcome is binary 
+#(correct or incorrect), and the coefficients represent log-odds.
+
+#The intercept (-0.434) is statistically significant (p < 0.001), indicating that 
+#the log-odds of a correct response are negative for low-AQ participants with 
+#low-AQ interviewees in the "classify_interact" condition. This corresponds to a 
+#predicted probability of less than 50% for a correct response in this reference group.
+
+#AQ_intvwee High interaction with expName Only_eyes:
+# This interaction term (-0.470) is statistically significant (p = 0.0158), 
+#suggesting that high-AQ interviewees reduce the likelihood of correct responses 
+#in the "Only_eyes" condition compared to low-AQ interviewees. This is a notable 
+#finding, as it indicates that participants struggle more to correctly classify 
+#responses when high-AQ interviewees are shown in this condition.
+
+#Coefficients for other main effects and interactions are not significant, indicating 
+#no substantial effect on the likelihood of a correct response.
+
+#Overall Model:
+#The residual deviance (7584.0) and AIC (7608) indicate the model's goodness of 
+#fit. The model shows some statistically significant interaction effects, but 
+#the overall fit is modest, and it does not fully explain the variability in 
+#correct responses.
+
+#Conclusion:
+#The presence of high-AQ interviewees seems to influence the likelihood of correct 
+#responses, especially in the "Only_eyes" condition, where it reduces accuracy. 
+#However, the individual AQ level of participants does not appear to have a strong 
+#effect on performance. Significant interactions suggest that different experimental 
+#conditions and the AQ level of interviewees play a more critical role in predicting accuracy.
+
 
 # Compute sensitivity, precision, F1-score per group:
 df_metrics <- df |>
