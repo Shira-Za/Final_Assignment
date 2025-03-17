@@ -4,6 +4,9 @@ This repository is for gathering the Final Assignment of R Beginners Course.
 ## The reason I chose this dataset:
 This data set is the gathered data from an experiment conducted in our lab. This experiment examines the “Gaze Aversion” phenomena and whether people grasp other peoples’ gaze aversion as a thinking process. To manipulate gaze aversion, we asked participants to look at 9 different locations on the screen and filmed their response. We used these videos in three experiments - in one, the videos were shown without changes (we only clipped them to be a few seconds long), in the second, the eyes were cut out, and only the face was shown, and in the third, only the eyes were shown. These participants were the interviewees group. Then, we showed another group of participants the videos and asked them to answer a few questions about the short videos they observed - they were the observers group. So, I chose this data set to assist a colleague with the analysis of the data and also because I find this project interesting and relevant to understanding social interactions better.
 
+## Exploring the data - The graphs:
+![ExplorativeData](https://github.com/user-attachments/assets/b7c2d3f7-5188-48a5-8b63-b1d73294b886)
+
 ## Research question:
 How do AQ levels (High vs. Low) of both the participant (AQ_Par) and the interviewer (AQ_intvwee) influence performance in a classification task across different experimental conditions? Specifically, how do AQ levels predict the likelihood of a correct response, reaction time, sensitivity, precision, F1-score, and accuracy?
 
@@ -18,3 +21,7 @@ The classification metrics (Sensitivity, Precision, and F1-Score) reveal mixed r
 
 ## ROC Curve and AUC Interpretation
 The ROC analysis indicated an AUC of 0.5282, which is very close to 0.5, suggesting that the model has poor discriminative power. The AUC value indicates that the model is performing almost no better than random guessing in classifying correct vs. incorrect responses. This highlights that the model’s ability to correctly differentiate between the two categories (correct vs. incorrect) is minimal. Therefore, using a different model is required to improve the performance in this analysis. 
+
+## Final analysis plots:
+![AnalyzedResults](https://github.com/user-attachments/assets/e6e199ae-9165-4285-9b32-e9cd3ef52f02)
+
